@@ -21,6 +21,7 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
+from sas.qtgui.MainWindow.CategoryManager import CategoryManager
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 
@@ -134,6 +135,7 @@ class GuiManager(object):
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
+        self.categoryManagerWidget = CategoryManager()
 
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
@@ -366,7 +368,7 @@ class GuiManager(object):
         self._workspace.actionShow_Grid_Window.triggered.connect(self.actionShow_Grid_Window)
         self._workspace.actionHide_Toolbar.triggered.connect(self.actionHide_Toolbar)
         self._workspace.actionStartup_Settings.triggered.connect(self.actionStartup_Settings)
-        self._workspace.actionCategry_Manager.triggered.connect(self.actionCategry_Manager)
+        self._workspace.actionCategory_Manager.triggered.connect(self.actionCategory_Manager)
         # Tools
         self._workspace.actionData_Operation.triggered.connect(self.actionData_Operation)
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
@@ -523,12 +525,10 @@ class GuiManager(object):
         print("actionStartup_Settings TRIGGERED")
         pass
 
-    def actionCategry_Manager(self):
+    def actionCategory_Manager(self):
         """
         """
-        print("actionCategry_Manager TRIGGERED")
-        pass
-
+        self.categoryManagerWidget.show()
     #============ TOOLS =================
     def actionData_Operation(self):
         """
