@@ -6,10 +6,6 @@ matrix:
   - os: osx
     language: generic
     env: PY=3.6
-branches:
-  only:
-  - master
-  - ESS_GUI
 addons:
   apt:
     packages:
@@ -44,6 +40,3 @@ script:
 - /bin/sh -xe sasview/build_tools/travis_build.sh
 - export LC_ALL=en_US.UTF-8
 - export LANG=en_US.UTF-8
-notifications:
-  slack:
-    secure: TlsEpZiMLmOOgnmdG0I/oB4tq3bbQYeBBQi6S5qLlkYE9EjUTbbfg7oz0JYUsQ56FAsdFR8zswpBsX7PebZerzrq0ZmvfHSiJhOFIdBfY5Nb7bmLW8/9pUNWV57ON/8Gw2fE5ytc7FgvCGR64yb2QISI/150SIUwvdL5HXTxRWI=
