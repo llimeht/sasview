@@ -33,7 +33,7 @@ install:
 script:
 - cd ..
 - export WORKSPACE=$(pwd)
-- git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
+- git clone --depth=50 --branch=tmp/doc-build https://github.com/llimeht/sasmodels.git sasmodels
 - git clone --depth=50 --branch=master https://github.com/bumps/bumps.git
 - ls -ltr
 - mkdir -p utils
