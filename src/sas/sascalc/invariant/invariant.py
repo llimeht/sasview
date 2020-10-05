@@ -149,7 +149,7 @@ class Guinier(Transform):
 
     def evaluate_model(self, x):
         """
-        return F(x)= scale* e-((radius*x)**2/3)
+        return :math:`F(x)= scale* \exp(-(radius*x)**2/3)`
         """
         return self._guinier(x)
 
@@ -170,7 +170,7 @@ class Guinier(Transform):
         """
         Retrieve the guinier function after apply an inverse guinier function
         to x
-        Compute a F(x) = scale* e-((radius*x)**2/3).
+        Compute a :math:`F(x) = scale* \exp(-(radius*x)**2/3)`.
 
         :param x: a vector of q values
         :param scale: the scale value
@@ -204,7 +204,7 @@ class PowerLaw(Transform):
 
         :param value: q-value
 
-        :return: log(q)
+        :return: :math:`\log(q)`
         """
         return math.log(value)
 
@@ -817,10 +817,17 @@ class InvariantCalculator(object):
         Historically, Sv was computed with the invariant and the Porod
         constant so as not to have to know the contrast in order to get the
         Sv as:
+
+        .. :math::
+
             surface = (pi * V * (1- V) * porod_const) / q_star
+
         However, that turns out to be a pointless exercise since it
         also requires a knowledge of the volume fractions and from the
-        volumer fraction and the invariant the contrast can be calculated as:
+        volume fraction and the invariant the contrast can be calculated as:
+
+        .. :math::
+
             contrast**2 = q_star / (2 * pi**2 * V * (1- V))
 
         Thus either way, mathematically it is always identical to computing
@@ -831,6 +838,9 @@ class InvariantCalculator(object):
         Implementation: ::
            Given the above, as of SasView 4.3 and 5.0.2 we compute Sv simply
            from the Porod Constant and the contrast between the two phases as:
+
+        .. :math::
+
              surface = porod_const / (2 * pi contrast**2) 
 
 
@@ -966,11 +976,19 @@ class InvariantCalculator(object):
         However we include the uncertainty computation for future use if and
         when these values get an uncertainty. This is given as:
 
+        .. :math::
+
             ds = sqrt[(s'_cp)**2 * dcp**2 + (s'_contrast)**2 * dcontrast**2]
-            where s'_x is the partial derivative of S with respect to x 
+
+        where s'_x is the partial derivative of S with respect to x
+
         which gives (this should be checked before using in anger)
+
+        .. :math::
+
             ds = sqrt((dporod_const**2 * contrast**2 + 4 * (porod_const *
                           dcontrast)**2) / (4 * pi**2 * contrast**6))
+
         We also assume some users will never enter a value for uncertainty so
         allow for None even when it is an option.
 
