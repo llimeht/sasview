@@ -91,6 +91,15 @@ release = '5.0.3'
 # Else, today_fmt is used as the format for a strftime call.
 #today_fmt = '%B %d, %Y'
 
+# Warn about all references to unknown targets
+nitpicky = True
+# Except for these ones, which we expect to point to unknown targets:
+nitpick_ignore = [
+    ("py:class", "numpy.ndarray"),
+    ("py:class", "np.ndarray"),
+    ("py:class", "Real"),
+    ("py:class", "Integral"),
+]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 #
