@@ -3,6 +3,9 @@
 from pathlib import Path
 import warnings
 
+import platform
+
+
 block_cipher = None
 
 datas = [
@@ -141,3 +144,11 @@ coll = COLLECT(
     upx_exclude=[],
     name='sasview'
 )
+
+if platform.system() == 'Darwin':
+    app = BUNDLE(
+        exe,
+        name='SasView.app',
+        icon='../src/sas/sasview/images/ball.ico',
+        bundle_identifier=None
+    )
