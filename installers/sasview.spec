@@ -4,10 +4,10 @@ import sys
 from pathlib import Path
 import warnings
 import platform
-import sys
+import sysconfig
 
 block_cipher = None
-PYTHON_LOC = sys.exec_prefix
+PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
 datas = [
     ('../src/sas/sasview/images', 'images'),
@@ -24,11 +24,9 @@ datas = [
 ]
 #TODO: Hopefully we can get away from version specific packages
 if platform.system() == 'Darwin':
-    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','jedi'),'jedi'))
-    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','zmq'),'.'))
-    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','debugpy'),'debugpy'))
-else:
-    datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy'))
+    datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
+    datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), '.'))
+    datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'),'debugpy'))
 
 def add_data(data):
     for component in data:
