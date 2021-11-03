@@ -52,6 +52,7 @@ hiddenimports = [
     'sas.sascalc.dataloader.readers.ascii_reader',
     'sas.sascalc.dataloader.readers.cansas_reader_HDF5',
     'sas.sascalc.dataloader.readers.cansas_reader',
+    'sas.sascalc.dataloader.readers.csv_reader',
     'sas.sascalc.dataloader.readers.danse_reader',
     'sas.sascalc.dataloader.readers.red2d_reader',
     'sas.sascalc.dataloader.readers.sesans_reader',
