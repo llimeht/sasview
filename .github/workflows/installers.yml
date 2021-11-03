@@ -31,19 +31,8 @@ jobs:
       run: |
         echo "::set-output name=dir::$(pip cache dir)"
 
-    - name: Obtain pip cache (macOS)
+    - name: Obtain pip cache
       uses: actions/cache@v2
-      if: startsWith(runner.os, 'macOS')
-      with:
-        path: ~/Library/Caches/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
-          ${{ runner.os }}-pip-
-
-    - name: Obtain pip cache (Windows)
-      uses: actions/cache@v2
-      if: startsWith(runner.os, 'Windows')
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
         key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
