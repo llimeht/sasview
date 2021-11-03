@@ -5,7 +5,7 @@ import logging.config
 import os
 import os.path
 
-import pkg_resources
+import importlib.resources
 
 from sas import get_custom_config
 
@@ -77,26 +77,11 @@ class SetupLogger(object):
         Debug ./sasview/
         Packaging: sas/sasview/
         Packaging / production does not work well with absolute paths
-        thus the multiple paths below
+        thus importlib is used to find a filehandle to the resource
+        wherever it is actually located.
         '''
-        places_to_look_for_conf_file = [
-            os.path.join(os.path.abspath(os.path.dirname(__file__)), filename),
-            filename,
-            os.path.join("sas", "sasview", filename),
-            os.path.join(os.getcwd(), "sas", "sasview", filename),
-        ]
-
-        # To avoid the exception in OSx
-        # NotImplementedError: resource_filename() only supported for .egg, not .zip
-        try:
-            places_to_look_for_conf_file.append(
-                pkg_resources.resource_filename(__name__, filename))
-        except NotImplementedError:
-            pass
-
-        for filepath in places_to_look_for_conf_file:
-            if os.path.exists(filepath):
-                self.config_file = filepath
-                return
-        print("ERROR: Logging.ini not found...")
         self.config_file = None
+        try:
+            self.config_file = importlib.resources.open_text('sas', filename)
+        except FileNotFoundError:
+            print("ERROR: logging.ini not found...")

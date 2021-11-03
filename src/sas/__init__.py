@@ -1,20 +1,8 @@
-__all__ = ['get_app_dir', 'get_user_dir',
-           'get_local_config', 'get_custom_config']
-
-_APP_DIR = None
-def get_app_dir():
-    """
-    The directory where the sasview application is found.
-
-    Returns the path to sasview if running in place or installed with setup.
-    If the application is frozen, returns the parent directory of the
-    application resources such as test files and images.
-    """
-    global _APP_DIR
-    if not _APP_DIR:
-        from ._config import find_app_dir
-        _APP_DIR = find_app_dir()
-    return _APP_DIR
+__all__ = [
+    'get_user_dir',
+    'get_local_config',
+    'get_custom_config',
+]
 
 _USER_DIR = None
 def get_user_dir():
@@ -41,7 +29,7 @@ def get_custom_config():
     global _CUSTOM_CONFIG
     if not _CUSTOM_CONFIG:
         from ._config import setup_custom_config
-        _CUSTOM_CONFIG = setup_custom_config(get_app_dir(), get_user_dir())
+        _CUSTOM_CONFIG = setup_custom_config(get_user_dir())
     return _CUSTOM_CONFIG
 
 
@@ -53,5 +41,5 @@ def get_local_config():
     global _LOCAL_CONFIG
     if not _LOCAL_CONFIG:
         from ._config import load_local_config
-        _LOCAL_CONFIG = load_local_config(get_app_dir())
+        _LOCAL_CONFIG = load_local_config()
     return _LOCAL_CONFIG
