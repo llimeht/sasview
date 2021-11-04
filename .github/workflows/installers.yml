@@ -13,7 +13,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        # Note on OS selection:
+        # - macos
+        # - windows
+        # - linux: the release that is used defines the oldest distro on which
+        #   the Linux pyinstaller output will run as libc is still
+        #   dynamically linked by pyinstaller.
+        #   https://pyinstaller.readthedocs.io/en/stable/usage.html#making-gnu-linux-apps-forward-compatible
+        os: [
+          macos-latest,
+          windows-latest,
+          ubuntu-18.04,
+          ubuntu-latest,
+        ]
         python-version: [3.8]
 
     steps:
