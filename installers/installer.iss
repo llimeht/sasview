@@ -36,6 +36,8 @@ SetupIconFile=../src/sas/qtgui/images/ball.ico
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 Compression=lzma
+LZMAUseSeparateProcess=yes
+LZMANumBlockThreads=6
 SolidCompression=yes
 WizardStyle=modern
 
