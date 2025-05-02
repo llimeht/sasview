@@ -225,7 +225,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
           cd installers
-          iscc /Qp installer.iss
+          iscc installer.iss /Qp
           mv Output/setupSasView.exe dist
 
       - name: Build sasview installer dmg file (OSX)
