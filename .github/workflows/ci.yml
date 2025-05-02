@@ -224,7 +224,7 @@ jobs:
       - name: Build sasview installer with INNO (Windows)
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
-          iscc /Qp installers/installer.iss
+          iscc /Qp 'installers\installer.iss'
           mv installers/Output/setupSasView.exe installers/dist
 
       - name: Build sasview installer dmg file (OSX)
