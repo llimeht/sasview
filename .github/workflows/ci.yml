@@ -225,7 +225,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
           cd installers
-          for i in {1..9}; do echo $i; sed -i s@^Compression=.*@Compression=zip/$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
+          for i in fast normal max ultra; do echo $i; sed -i s@^Compression=.*@Compression=lzma2/$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
           ls -l dist
 
       - name: Build sasview installer dmg file (OSX)
