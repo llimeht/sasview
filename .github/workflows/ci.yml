@@ -225,7 +225,17 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
           cd installers
-          for i in fast normal max ultra; do echo $i; sed -i s@^Compression=.*@Compression=lzma2/$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
+          echo
+          echo NORMAL
+          echo
+          for i in 1 2 4 6 8 16; do echo $i; sed -i s@^LZMANumBlockThreads=.*@LZMANumBlockThreads=$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
+          ls -l dist
+          rm dist/*exe
+          sed -i s@^Compression=.*@Compression=lzma2/max@ installer.iss
+          echo
+          echo MAX
+          echo
+          for i in 1 2 4 6 8 16; do echo $i; sed -i s@^LZMANumBlockThreads=.*@LZMANumBlockThreads=$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
           ls -l dist
 
       - name: Build sasview installer dmg file (OSX)
