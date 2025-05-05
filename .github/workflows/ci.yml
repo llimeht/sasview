@@ -228,13 +228,27 @@ jobs:
           echo
           echo NORMAL
           echo
+          sed -i s@^Compression=.*@Compression=lzma/normal@ installer.iss
           for i in 1 2 4 6 8 16; do echo $i; sed -i s@^LZMANumBlockThreads=.*@LZMANumBlockThreads=$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
           ls -l dist
           rm dist/*exe
-          sed -i s@^Compression=.*@Compression=lzma/max@ installer.iss
           echo
           echo MAX
           echo
+          sed -i s@^Compression=.*@Compression=lzma/max@ installer.iss
+          for i in 1 2 4 6 8 16; do echo $i; sed -i s@^LZMANumBlockThreads=.*@LZMANumBlockThreads=$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
+          ls -l dist
+          echo
+          echo 2NORMAL
+          echo
+          sed -i s@^Compression=.*@Compression=lzma2/normal@ installer.iss
+          for i in 1 2 4 6 8 16; do echo $i; sed -i s@^LZMANumBlockThreads=.*@LZMANumBlockThreads=$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
+          ls -l dist
+          rm dist/*exe
+          echo
+          echo 2MAX
+          echo
+          sed -i s@^Compression=.*@Compression=lzma2/max@ installer.iss
           for i in 1 2 4 6 8 16; do echo $i; sed -i s@^LZMANumBlockThreads=.*@LZMANumBlockThreads=$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
           ls -l dist
 
