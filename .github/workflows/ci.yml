@@ -231,7 +231,7 @@ jobs:
           for i in 1 2 4 6 8 16; do echo $i; sed -i s@^LZMANumBlockThreads=.*@LZMANumBlockThreads=$i@ installer.iss; time iscc installer.iss 2>&1 > output.log; stat -c%s Output/setupSasView.exe; mv Output/setupSasView.exe dist/setupSasView-$i.exe; echo; done
           ls -l dist
           rm dist/*exe
-          sed -i s@^Compression=.*@Compression=lzma2/max@ installer.iss
+          sed -i s@^Compression=.*@Compression=lzma/max@ installer.iss
           echo
           echo MAX
           echo
