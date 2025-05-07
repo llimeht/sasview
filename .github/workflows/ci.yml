@@ -39,7 +39,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.13
 
       - uses: actions/checkout@v4
       - id: set-matrix
@@ -64,7 +64,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.13
 
       ### Installation of some build-dependencies
 
@@ -325,7 +325,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-latest, macos-latest, ubuntu-22.04 ]
-        python-version: [ 3.11 ]
+        python-version: [ 3.13 ]
       fail-fast: false
 
     name: Test installer
