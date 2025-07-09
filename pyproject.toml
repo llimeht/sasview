@@ -105,7 +105,6 @@ artifacts = [
 
 [tool.hatch.build.targets.wheel.force-include]
 "build/doc/html/" = "sas/docs"
-"docs/sphinx-docs/source-temp/" = "sas/docs-source"
 "src/sas/sasview/media/" = "sas/sasview/media"
 "src/sas/example_data/" = "sas/example_data"
 
@@ -167,7 +166,7 @@ doc_dir = "docs/sphinx-docs/source-temp"
 out_dir = "../../../build/doc/html"
 warnings = false
 keep_going = true
-sphinx_opts = "-d ../../../build/doc/html/doctrees"
+sphinx_opts = "-d ../../../build/doc/doctrees"
 environment = { PYTHONPATH = "../../../src" }
 
 
