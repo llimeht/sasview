@@ -718,3 +718,54 @@ jobs:
         run: |
           cd unpack/sasview
           ./sasview.exe
+
+  installer-pyapp-matrix:
+    needs: [matrix, build-sasview]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.matrix.outputs.installer-matrix-json) }}
+
+    name: "pyapp ${{ matrix.job_name }}"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Obtain SasView source from git
+        uses: actions/checkout@v7
+
+      - name: Install uv utilities to speed up python module installation
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          prune-cache: false
+
+      - name: Prep redistributable python environment
+        shell: bash
+        run: |
+          ./build_tools/build_pyapp prep
+          echo "UV_PYTHON=$(cat tmp/.python)" >> $GITHUB_ENV
+
+      - name: Install sasview wheel (and dependencies)
+        uses: ./.github/actions/install-wheel
+        with:
+          python-version: ${{ matrix.python-version }}
+          os: ${{ matrix.os }}
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.job.target }}
+
+      - name: Finish redistributable python environment
+        shell: bash
+        run: |
+          ./build_tools/build_pyapp finish
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: SasView-Standalone-${{ matrix.os }}-${{ matrix.python-version }}
+          path: tmp/packaging/*
+          if-no-files-found: error

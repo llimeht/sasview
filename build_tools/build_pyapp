@@ -1,0 +1,219 @@
+#!/bin/bash
+
+set -e
+set -u
+set -x
+
+# work directory
+work="$PWD/tmp"
+
+# ######################################################################
+# SasView pyapp config
+
+export PYAPP_PROJECT_NAME=sasview
+# FIXME obtain this from external data
+export PYAPP_PROJECT_VERSION=6.2.0
+# FIXME obtain this from external data
+export PYAPP_EXEC_SPEC=sas.cli:main
+
+# defined Python version for this release
+# FIXME obtain this from external data
+export PYAPP_PYTHON_VERSION=3.13
+
+# no optional dependency groups to include
+export PYAPP_PROJECT_FEATURES=
+
+# perhaps useful for windows?
+# export PYAPP_IS_GUI=1
+
+# setup for the isolated pyapp
+export PYAPP_DISTRIBUTION_PATH="$work/prepared-python.tar.zstd"
+export PYAPP_DISTRIBUTION_PATH_PREFIX=python
+
+# Python installations look different in different places
+case "$OSTYPE" in
+    msys|cygwin|win32)
+        export PYAPP_DISTRIBUTION_PYTHON_PATH="python.exe"
+        export PYAPP_DISTRIBUTION_SITE_PACKAGES_PATH="Lib/site-packages"
+        ;;
+    *)
+        export PYAPP_DISTRIBUTION_PYTHON_PATH="bin/python3"
+        export PYAPP_DISTRIBUTION_SITE_PACKAGES_PATH="lib/python$PYAPP_PYTHON_VERSION/site-packages"
+esac
+
+export PYAPP_PIP_EXTRA_ARGS=--no-deps
+export PYAPP_SKIP_INSTALL=1
+export PYAPP_FULL_ISOLATION=1
+
+# ######################################################################
+# Working paths for wheels, temporary files, outputs etc
+
+pyapp="$work/pyapp"
+# FIXME this probably needs architectures added to it here...
+wheelhouse="$work/wheelhouse"
+runtime="$work/runtime"
+outdir="$work/packaging"
+
+# ######################################################################
+# Tools
+
+install_uv() {
+    if command -v uv >/dev/null; then
+        echo "I: Using system uv"
+        UV=$(command -v uv)
+    elif [ -x "$work"/uv/uv ]; then
+        echo "I: Using existing uv"
+        UV="$work"/uv/uv
+    else
+        echo "I: Installing uv"
+        curl -LsSf https://astral.sh/uv/install.sh |
+            UV_INSTALL_DIR="$work/uv" \
+            UV_NO_MODIFY_PATH=1 \
+            sh
+        UV="$work"/uv/uv
+    fi
+}
+
+download() {
+    local name="$1" url="$2" archive="$3" target="$4"
+    if [ -d "$target" ]; then
+        echo "I: Using existing $name installation"
+        return
+    fi
+
+    if [ ! -f "$archive" ]; then
+        echo "I: Fetching $name"
+        curl "$url" -# -Lo "$archive"
+    else
+        echo "I: Using existing tarball for $name, $archive"
+    fi
+    echo "I: preparing $name"
+    mkdir -p "$target"
+    tar xf "$archive" --strip-components 1 -C "$target"
+}
+
+install_pyapp() {
+    download pyapp \
+        https://github.com/ofek/pyapp/releases/latest/download/source.tar.gz \
+        "$work"/pyapp-source.tar.gz \
+        "$pyapp"
+}
+
+# ######################################################################
+# Wrangle the Python runtime for redistribution
+
+fetch_python_distribution() {
+    local uv_python uv_root
+    echo "I: obtaining python-distribution via uv"
+    "$UV" python install $PYAPP_PYTHON_VERSION
+
+    uv_python=$("$UV" python find $PYAPP_PYTHON_VERSION)
+    uv_root=$("$uv_python" -c 'import sys; print(sys.prefix)')
+
+    echo "  Python: $uv_python"
+    echo "  Distribution root: $uv_root"
+
+    rm -rf "$runtime"
+    mkdir -p "$runtime"
+    cp -rL "$uv_root" "$runtime"/python
+    # find "$runtime" -ls
+    # Allow 'uv pip' to work in the next steps
+    rm -f "$runtime"/python/lib/python*/EXTERNALLY-MANAGED "$runtime"/python/Lib/EXTERNALLY-MANAGED
+
+    runtimepython=$(get_runtime_python)
+    test -x "$runtimepython"
+}
+
+get_runtime_python() {
+    # locate the runtime
+    echo "$runtime/python/$PYAPP_DISTRIBUTION_PYTHON_PATH"
+}
+
+prep_python_distribution() {
+    echo "I: Building python+modules distribution"
+    # python-build-standalone archives contain a top-level "python" directory.
+    runtimepython=$(get_runtime_python)
+    test -x "$runtimepython"
+
+    # Install SasView and all its dependencies into the runtime itself.
+    UV_PYTHON="$runtimepython" \
+    "$UV" pip install \
+        "sasview==$PYAPP_PROJECT_VERSION"
+}
+
+prep_python_redistributable() {
+    # check that the installation worked ok
+    echo "I: Checking sasview installation"
+    runtimepython=$(get_runtime_python)
+    "$runtimepython" -c 'import sas; print(f"  Found: {sas.__file__}")'
+    "$runtimepython" -c 'from sas.cli import main; print(f"  Found: {main}")'
+    "$runtimepython" -c 'import sas.system.version; print(f"  Found: {sas.system.version.__version__}")'
+
+    # Repack the now-prepared runtime.
+    echo "I: building the environment tarball"
+    tar --zstd  -cf "$PYAPP_DISTRIBUTION_PATH" \
+        -C "$runtime" \
+        python
+}
+
+# ######################################################################
+# Build the executable for distribution
+
+build_pyapp() {
+    local output cleanname
+    echo "I: Building the distributable with pyapp"
+    (
+        cd "$pyapp"
+        cargo build --release
+    )
+    echo "I: Copying distributable to '$outdir'"
+    mkdir -p $outdir
+    mv "$pyapp"/target/release/pyapp "$outdir"
+    output=$(find tmp/packaging/ -type f -print0 -quit)
+    cleanname=${output/pyapp/sasview}
+    mv "$output" "$cleanname"
+    echo "I: Output created: '$cleanname'"
+}
+
+
+# ######################################################################
+
+steps_all() {
+    install_uv
+    fetch_python_distribution
+    prep_python_distribution
+    prep_python_redistributable
+    install_pyapp
+    build_pyapp
+}
+
+steps_ci_prep() {
+    # UV is separately installed
+    UV=uv
+    fetch_python_distribution
+    get_runtime_python > $work/.python
+}
+
+steps_ci_finish() {
+    prep_python_redistributable
+    install_pyapp
+    build_pyapp
+}
+
+
+MODE=${1:-all}   # default is to do all steps
+
+case $MODE in
+    all)
+        steps_all
+        ;;
+    prep)
+        steps_ci_prep
+        ;;
+    finish)
+        steps_ci_finish
+        ;;
+    *)
+        echo "E: unknown mode of operation"
+        exit 1
+esac
