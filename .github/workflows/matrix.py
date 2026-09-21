@@ -59,12 +59,12 @@ python_test_list = python_release_list + [
 
 # On push events, only test the latest Python version to avoid duplicating
 # work when a pull_request event fires for the same commit.
-if is_push_event:
-    python_test_list = [
-        max(python_test_list, key=lambda v: tuple(int(x) for x in v.partition("-")[0].split(".")))
-    ]
-    # TODO: this really should be the following... but also, this prevents running the test matrix without a PR which is painful
-    # python_test_list = python_release_list
+# if is_push_event:
+#     python_test_list = [
+#         max(python_test_list, key=lambda v: tuple(int(x) for x in v.partition("-")[0].split(".")))
+#     ]
+#     # TODO: this really should be the following... but also, this prevents running the test matrix without a PR which is painful
+#     # python_test_list = python_release_list
 
 
 def truthy(val: Any) -> int:
