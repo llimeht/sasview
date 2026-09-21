@@ -2,7 +2,12 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SasView"
-#define MyAppVersion "6.2.0"
+; The version is taken from the SASVIEW_VERSION environment variable, which
+; avoids shell quoting problems with a /D define on the iscc command line.
+#define MyAppVersion GetEnv("SASVIEW_VERSION")
+#if MyAppVersion == ""
+  #error SASVIEW_VERSION environment variable must be set
+#endif
 #define MyAppPublisher "(c) 2009 - 2026, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, BAM, TU Delft, and DLS"
 #define MyAppURL "http://www.sasview.org"
 #define MyAppExeName "sasview.exe"
@@ -62,9 +67,7 @@ begin
 end;
 
 [Files]
-Source: "dist\sasview\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\AppData\Local\sasview\SasView\plugin_models"
-Source: "dist\sasview\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\tmp\packaging\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [InstallDelete]
 ; Delete all files in the directory prior to installation to prevent version conflicts

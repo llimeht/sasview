@@ -5,8 +5,9 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
-from mako.template import Template
+from mako.template import Template  # type: ignore
 
 # Define Mako template for HTML output
 html_template = Template(
@@ -66,16 +67,19 @@ minimal_modules = [
 ]
 
 
-def get_modules():
+def get_modules(minimal: bool, python: str | None) -> dict[str, Any]:
     """Load pip-licenses JSON output"""
+    cmd: list[str] = [
+        "pip-licenses",
+        *(["--python", python] if python else []),
+        *(["--packages", *minimal_modules] if minimal else []),
+        "--format=json",
+        "--with-system",
+        "--with-authors",
+        "--with-license-file",
+    ]
     result = subprocess.run(
-        [
-            "pip-licenses",
-            "--format=json",
-            "--with-system",
-            "--with-authors",
-            "--with-license-file",
-        ],
+        cmd,
         capture_output=True,
         text=True,
         check=True,
@@ -86,12 +90,7 @@ def get_modules():
     return modules
 
 
-def filter_modules(modules, included):
-    """Filter the list of packages to only include the specified packages"""
-    return [m for m in modules if m["Name"].lower() in included]
-
-
-def format_html(filename, modules, minimal):
+def format_html(filename: str, modules: dict[str, Any], minimal: bool) -> None:
     """Create the HTML output"""
     # Render the template with license data
     html_output = html_template.render(modules=modules, minimal=minimal)
@@ -100,7 +99,7 @@ def format_html(filename, modules, minimal):
     Path(filename).write_text(html_output, encoding="utf-8")
 
 
-def main(argv):
+def main(argv: list[str]) -> bool:
     parser = argparse.ArgumentParser(
         description="Extract license information for modules in the environment",
     )
@@ -109,6 +108,11 @@ def main(argv):
         "--minimal",
         action="store_true",
         help="Only include information about a minimal set of modules",
+    )
+    parser.add_argument(
+        "--python",
+        metavar="PYTHON_EXEC",
+        help="path to python executable to search distributions from",
     )
     parser.add_argument(
         "filename",
@@ -120,11 +124,9 @@ def main(argv):
 
     minimal = args.minimal
     filename = args.filename
+    python = args.python
 
-    modules = get_modules()
-
-    if minimal:
-        modules = filter_modules(modules, minimal_modules)
+    modules = get_modules(minimal, python)
 
     format_html(filename, modules, minimal)
 

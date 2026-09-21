@@ -4,7 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-DIST_DIR="${REPO_ROOT}/installers/dist"
+DIST_DIR="${REPO_ROOT}/tmp/packaging"
+OUT_DIR="${REPO_ROOT}/installers/dist"
 STAGING_DIR="${DIST_DIR}/dmg-staging"
 APP_NAME="SasView6.app"
 DMG_NAME="${1:-SasView6.dmg}"
@@ -41,7 +42,8 @@ rm -rf "${STAGING_DIR}"
 mkdir -p "${STAGING_DIR}"
 cp -R "${DIST_DIR}/${APP_NAME}" "${STAGING_DIR}/"
 
-rm -f "${DIST_DIR}/${DMG_NAME}"
+mkdir -p "${OUT_DIR}"
+rm -f "${OUT_DIR}/${DMG_NAME}"
 
 # Eject any previously mounted copy so Finder does not reuse a cached layout.
 if mount | grep -q "/Volumes/${VOLUME_NAME}"; then
@@ -53,6 +55,6 @@ dmgbuild -s "${SCRIPT_DIR}/dmg_settings.py" \
     -D "staging_dir=${STAGING_DIR}" \
     -D "app_name=${APP_NAME}" \
     "${VOLUME_NAME}" \
-    "${DIST_DIR}/${DMG_NAME}"
+    "${OUT_DIR}/${DMG_NAME}"
 
-echo "Created ${DIST_DIR}/${DMG_NAME}"
+echo "Created ${OUT_DIR}/${DMG_NAME}"
