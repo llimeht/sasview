@@ -219,12 +219,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Obtain wheel cache
+        id: cache-sasview-wheel
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/cache-sasview-wheel/
+          key: wheel-sasview-${{ hashFiles('docs/**', 'src/**', 'pyproject.coml') }}
+
       - name: Set up Python
+        if: steps.cache-sasview-wheel.outputs.cache-hit != 'true'
         uses: actions/setup-python@v7
         with:
           python-version: ${{ env.RELEASE_PYVER }}
 
       - name: Install uv utilities to speed up python module installation
+        if: steps.cache-sasview-wheel.outputs.cache-hit != 'true'
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
@@ -233,6 +242,7 @@ jobs:
       ### Installation of build-dependencies
 
       - name: Install system library build-dependencies
+        if: steps.cache-sasview-wheel.outputs.cache-hit != 'true'
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
@@ -244,6 +254,7 @@ jobs:
           sudo eatmydata apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev libcairo2-dev
 
       - name: Fetch wheels of sibling projects
+        if: steps.cache-sasview-wheel.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v8
         with:
           path: dist/
@@ -251,25 +262,30 @@ jobs:
           merge-multiple: true
 
       - name: Install correct versions of sibling projects
+        if: steps.cache-sasview-wheel.outputs.cache-hit != 'true'
         run: |
           uv pip install dist/*whl
 
       - name: Install Python dependencies
+        if: steps.cache-sasview-wheel.outputs.cache-hit != 'true'
         run: |
           uv pip install -r build_tools/requirements-dev.txt
 
       ### Actual building of sasview
 
       - name: Build sasview
+        if: steps.cache-sasview-wheel.outputs.cache-hit != 'true'
         run: |
           python -m build --no-isolation --sdist --wheel
+          mkdir -p ~/.cache/cache-sasview-wheel/
+          cp dist/*whl dist/*tar* ~/.cache/cache-sasview-wheel/
 
       - name: Publish sdist
         uses: actions/upload-artifact@v7
         with:
           name: sasview-sdist
           path: |
-            dist/sasview*tar*
+            ~/.cache/cache-sasview-wheel/sasview*tar*
           if-no-files-found: error
 
       - name: Publish wheel package
@@ -277,7 +293,7 @@ jobs:
         with:
           name: sasview-wheel
           path: |
-            dist/sasview*whl
+           ~/.cache/cache-sasview-wheel/*.whl
           if-no-files-found: error
 
   test-matrix:
