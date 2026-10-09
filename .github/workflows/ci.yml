@@ -627,6 +627,7 @@ jobs:
         run: |
           # This is a standalone binary for Linux, not an installer
           mkdir -p "$INSTALL_PATH"
+          chmod +x "$DL_PATH/sasview-standalone"
           cp "$DL_PATH/sasview-standalone" "$INSTALL_PATH/"
 
       - name: Check installation files
